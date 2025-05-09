@@ -86,17 +86,11 @@ void MySegDisplay::begin(pin_size_t ledDigits[DIGIT_COUNT], pin_size_t shrSer, p
 
 void MySegDisplay::setNumber(int number, int decimalPoint)
 {
-    // Serial.print("Setting number: ");
-    // Serial.println(number);
     _number = number;
     _decPoint = decimalPoint;
     for (size_t i = 1; i <= DIGIT_COUNT; i++)
     {
         setDigit(0);
-        // Serial.print(F("Setting digit "));
-        // Serial.print(i);
-        // Serial.print(F(" to "));
-        // Serial.println(number % 10);
         auto bits = digitBits(number % 10);
         if (decimalPoint == i - 1)
         {

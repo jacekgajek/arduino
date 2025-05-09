@@ -1,6 +1,8 @@
 #include <Arduino.h>
 #include <MySegDisplay.h>
 
+#define PIN_BUTTON PIN_D1
+
 #define LED_DIGIT_1 PIN_D2
 #define LED_DIGIT_2 PIN_D4
 #define LED_DIGIT_3 PIN_D5
@@ -12,6 +14,8 @@
 
 MySegDisplay display;
 
+void triggerButton();
+
 void setup() {
     pin_size_t ledPins[] ={ LED_DIGIT_1, LED_DIGIT_2, LED_DIGIT_3, LED_DIGIT_4 } ;
 
@@ -21,14 +25,19 @@ void setup() {
     }
     Serial.println("Hello Serial!");
     display.begin(ledPins, SHR_SER, SHR_RCLK, SHR_SRCLK);
+    pinMode(PIN_BUTTON, INPUT_PULLUP);
+
+    attachInterrupt(PIN_BUTTON, triggerButton, RISING);
+
 }
 
 int x = random(10000);
 int lastChange = 0;
+bool run = true;
 
 void loop()
 {
-    if (millis() - lastChange >= 300)
+    if (run && millis() - lastChange >= 300)
     {
         lastChange = millis();
         if (++x > 9999)
@@ -38,4 +47,9 @@ void loop()
         display.setNumber(x, x % 4);
     }
     display.refresh();
+}
+
+void triggerButton()
+{
+    run = !run;
 }
