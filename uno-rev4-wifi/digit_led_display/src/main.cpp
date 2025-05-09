@@ -23,12 +23,12 @@ void setup() {
     display.begin(ledPins, SHR_SER, SHR_RCLK, SHR_SRCLK);
 }
 
-int x = 0;
+int x = random(10000);
 int lastChange = 0;
 
 void loop()
 {
-    if (millis() - lastChange >= 1000)
+    if (millis() - lastChange >= 300)
     {
         lastChange = millis();
         if (++x > 9999)
