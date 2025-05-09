@@ -1,0 +1,25 @@
+#pragma once
+#include "Arduino.h"
+
+class MySegDisplay {
+
+    private:
+        static const int DIGIT_COUNT = 4;
+        int _number;
+        int _decPoint;
+        pin_size_t digitPins[DIGIT_COUNT];
+
+        pin_size_t shrSer;
+        pin_size_t shrRclk;
+        pin_size_t shrSrclk;
+
+        void storeInShiftRegister(uint8_t data);
+        uint8_t setDigit(uint8_t whichDigit);
+        uint8_t digitBits(uint8_t digit);
+        uint8_t pointBits();
+
+    public:
+        void begin(pin_size_t ledDigits[DIGIT_COUNT], pin_size_t shrSer, pin_size_t shrRclk, pin_size_t shrSrclk);
+        void setNumber(int number, int decimalPoint = -1);
+        void refresh();
+};

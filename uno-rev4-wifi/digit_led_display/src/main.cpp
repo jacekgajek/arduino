@@ -1,0 +1,41 @@
+#include <Arduino.h>
+#include <MySegDisplay.h>
+
+#define LED_DIGIT_1 PIN_D2
+#define LED_DIGIT_2 PIN_D4
+#define LED_DIGIT_3 PIN_D5
+#define LED_DIGIT_4 PIN_D3
+
+#define SHR_SER PIN_D8
+#define SHR_RCLK PIN_D9
+#define SHR_SRCLK PIN_D10
+
+MySegDisplay display;
+
+void setup() {
+    pin_size_t ledPins[] ={ LED_DIGIT_1, LED_DIGIT_2, LED_DIGIT_3, LED_DIGIT_4 } ;
+
+    Serial.begin(9600);
+    while (!Serial) {
+        ;
+    }
+    Serial.println("Hello Serial!");
+    display.begin(ledPins, SHR_SER, SHR_RCLK, SHR_SRCLK);
+}
+
+int x = 0;
+int lastChange = 0;
+
+void loop()
+{
+    if (millis() - lastChange >= 1000)
+    {
+        lastChange = millis();
+        if (++x > 9999)
+        {
+            x = 0;
+        }
+        display.setNumber(x, x % 4);
+    }
+    display.refresh();
+}

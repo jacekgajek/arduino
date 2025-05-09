@@ -12,11 +12,11 @@
         },
         {
             "name": "rgb",
-            "path": "../../rgb"
+            "path": "rgb"
         },
         {
             "name": "digit_led_display",
-            "path": "../../digit_led_display"
+            "path": "digit_led_display"
         }
     ],
 	"settings": {
