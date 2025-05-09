@@ -9,14 +9,29 @@
         },
         {
             "path": "blink"
+        },
+        {
+            "name": "rgb",
+            "path": "../../rgb"
+        },
+        {
+            "name": "digit_led_display",
+            "path": "../../digit_led_display"
         }
     ],
 	"settings": {
 		"files.associations": {
-			"algorithm": "cpp",
-			"istream": "cpp",
-			"limits": "cpp",
-			"streambuf": "cpp"
-		}
+            "algorithm": "cpp",
+            "istream": "cpp",
+            "limits": "cpp",
+            "streambuf": "cpp",
+            "typeinfo": "cpp"
+        },
+        "github.copilot.enable": {
+            "*": true,
+            "plaintext": false,
+            "markdown": false,
+            "scminput": false
+        }
 	}
 }

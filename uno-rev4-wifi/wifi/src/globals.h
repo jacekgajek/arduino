@@ -5,9 +5,9 @@
 #include <Buzzer.h>
 
 #define LED_PIN 6
-#define BUZZER_PIN 7
-#define BUTTON_UP_PIN 3
-#define BUTTON_DOWN_PIN 2
+// #define BUZZER_PIN 7
+#define BUTTON_UP_PIN 13
+// #define BUTTON_DOWN_PIN 2
 
 #define DHT_DATA_PIN 4
 
@@ -17,8 +17,8 @@ const long TIME_ZONE_OFFSET_HOURS = 2;
 
 extern WiFiServer server;
 extern DHT dht;
-extern Blinker blinker;
-extern Buzzer buzzer;
+// extern Blinker blinker;
+// extern Buzzer buzzer;
 extern Clock myClock;
 
 extern volatile bool printInfo;

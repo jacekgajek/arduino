@@ -42,25 +42,21 @@ void triggerPrintingWifiData()
     printInfo = true;
 }
 
-void triggerBuzzerSwitch()
-{
-    buzzer.setIsActive(!buzzer.isActive());
-}
+// void triggerBuzzerSwitch()
+// {
+    // buzzer.setIsActive(!buzzer.isActive());
+// }
 
-void triggerBuzzerStart()
-{
-    buzzer.activate();
-}
+// void triggerBuzzerStart()
+// {
+    // buzzer.activate();
+// }
 
 void initPins()
 {
-    pinMode(LED_PIN, OUTPUT);
-    pinMode(BUZZER_PIN, OUTPUT);
     pinMode(BUTTON_UP_PIN, INPUT_PULLUP);
-    pinMode(BUTTON_DOWN_PIN, INPUT_PULLUP);
 
     attachInterrupt(BUTTON_UP_PIN, triggerPrintingWifiData, RISING);
-    attachInterrupt(BUTTON_DOWN_PIN, triggerBuzzerSwitch, RISING);
 
 }
 
@@ -84,14 +80,14 @@ void initTime() {
 }
 
 void initAlarm() {
-    buzzer.setDelay(300);
-    buzzer.setDuration(50);
+    // buzzer.setDelay(300);
+    // buzzer.setDuration(50);
 
     AlarmTime alarmTime;
     EEPROM.get(0, alarmTime);
     if (alarmTime.hour >= 0 && alarmTime.hour < 24 &&
         alarmTime.minute >= 0 && alarmTime.minute < 60) {
-        myClock.setAlarm(alarmTime, triggerBuzzerStart);
+        // myClock.setAlarm(alarmTime, triggerBuzzerStart);
         Serial.println("Alarm set on: " + myClock.getFormattedAlarm() + " (UTC+" + String(TIME_ZONE_OFFSET_HOURS) + ")");
     }
 }
