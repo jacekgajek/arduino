@@ -16,7 +16,7 @@ void MySegDisplay::refresh()
 void MySegDisplay::storeInShiftRegister(uint8_t data)
 {
     digitalWrite(shrRclk, LOW);
-    SPI.beginTransaction(SPISettings(2000000, BitOrder::LSBFIRST, SPI_MODE0));
+    SPI.beginTransaction(SPISettings(20'000'000, BitOrder::LSBFIRST, SPI_MODE0));
     SPI.transfer(data);
     SPI.endTransaction();
     digitalWrite(shrRclk, HIGH);
@@ -69,7 +69,7 @@ void MySegDisplay::updateState(int8_t digit, uint8_t bits)
     state[digit] = bits;
 }
 
-void MySegDisplay::begin(pin_size_t ledDigits[DIGIT_COUNT], pin_size_t shrRclk)
+void MySegDisplay::begin(pin_size_t ledDigits[DIGIT_COUNT], pin_size_t shrRclk, pin_size_t oe)
 {
     for (size_t i = 0; i < DIGIT_COUNT; i++)
     {
@@ -78,6 +78,7 @@ void MySegDisplay::begin(pin_size_t ledDigits[DIGIT_COUNT], pin_size_t shrRclk)
 
     pinMode(PIN_SPI_MOSI, OUTPUT);
     pinMode(shrRclk, OUTPUT);
+    pinMode(outputEnablePin, OUTPUT);
     pinMode(PIN_SPI_SCK, OUTPUT);
 
     for (int i = 0; i < DIGIT_COUNT; i++)
@@ -86,6 +87,7 @@ void MySegDisplay::begin(pin_size_t ledDigits[DIGIT_COUNT], pin_size_t shrRclk)
     }
     
     this->shrRclk = shrRclk;
+    this->outputEnablePin = oe;
 }
 
 void MySegDisplay::setNumber(int number, int decimalPoint)

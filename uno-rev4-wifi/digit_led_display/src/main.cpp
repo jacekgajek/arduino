@@ -9,6 +9,7 @@
 #define LED_DIGIT_4 PIN_D3
 
 #define SHR_RCLK PIN_D10
+#define PIN_OE PIN_D8
 
 MySegDisplay display;
 
@@ -22,7 +23,7 @@ void setup() {
         ;
     }
     Serial.println("Hello Serial!");
-    display.begin(ledPins, SHR_RCLK);
+    display.begin(ledPins, SHR_RCLK, PIN_OE);
     pinMode(PIN_BUTTON, INPUT_PULLUP);
 
     attachInterrupt(PIN_BUTTON, triggerButton, RISING);
@@ -57,9 +58,11 @@ void nextPrime(int &p)
     } while (!isPrime(p));
 }
 
+int updateIntervalMs = 1000;
+int speed = 2;
 void loop()
 {
-    if (run && millis() - lastChange >= 800)
+    if (run && millis() - lastChange >= updateIntervalMs)
     {
         // display.horizontalLine(x++ % 3);
 
@@ -77,12 +80,34 @@ void loop()
         {
             x = 1;
         }
-        display.setNumber(x, dot++ % 4);
+        display.setNumber(x, dot % 4);
+        dot ++;
     }
     display.refresh();
 }
 
 void triggerButton()
 {
-    run = !run;
+    speed = (speed + 1) % 5;
+    switch (speed)
+    {
+    case 0:
+        updateIntervalMs = 1000;
+        break;
+    case 1:
+        updateIntervalMs = 500;
+        break;
+    case 2:
+        updateIntervalMs = 200;
+        break;
+    case 3:
+        updateIntervalMs = 100;
+        break;
+    case 4:
+        updateIntervalMs = 50;
+        break;
+    default:
+        break;
+    }
+
 }
