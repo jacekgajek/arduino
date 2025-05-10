@@ -31,20 +31,45 @@ void setup() {
 
 }
 
-int x = random(10000);
+int x = 0;
+int dot = 0;
 int lastChange = 0;
 bool run = true;
 
+bool isPrime(int p)
+{
+    for (int i = p / 2; i > 1; i--)
+    {
+        if (p % i == 0)
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+void nextPrime(int &p)
+{
+    do
+    {
+        p += 2;
+    } while (!isPrime(p));
+}
+
 void loop()
 {
-    if (run && millis() - lastChange >= 300)
+    if (run && millis() - lastChange >= 800)
     {
+        display.horizontalLine(x++ % 3);
+
+        display.setGlyph(1, 0b10010010);
         lastChange = millis();
-        if (++x > 9999)
-        {
-            x = 0;
-        }
-        display.setNumber(x, x % 4);
+        // nextPrime(x);
+        // if (x > 9999)
+        // {
+        //     x = 1;
+        // }
+        // display.setNumber(x, dot++ % 4);
     }
     display.refresh();
 }

@@ -1,31 +1,32 @@
 #include "MySegDisplay.h"
+// #include "SPI.h"
 
 void MySegDisplay::refresh()
 {
-    setNumber(_number, _decPoint);
+    chooseDigit(-1);
+    for (size_t i = 0; i < DIGIT_COUNT; i++)
+    {
+        chooseDigit(i);
+        storeInShiftRegister(state[i]);
+        delay(1);
+    }
+    chooseDigit(-1);
 }
 
 void MySegDisplay::storeInShiftRegister(uint8_t data)
 {
+    // SPI.begin();
     digitalWrite(shrRclk, LOW);
-    for (byte i = 0; i < 8; i++)
-    {
-        digitalWrite(shrSrclk, LOW);
-        digitalWrite(shrSer, data & (1 << i));
-        digitalWrite(shrSrclk, HIGH);
-    }
+    // SPI.transfer(data);
+    shiftOut(shrSer, shrSrclk, BitOrder::LSBFIRST, data);
     digitalWrite(shrRclk, HIGH);
 }
 
-uint8_t MySegDisplay::setDigit(uint8_t whichDigit)
+void MySegDisplay::chooseDigit(int8_t whichDigit)
 {
     for (size_t i = 0; i < DIGIT_COUNT; i++)
     {
-        if (i + 1 == whichDigit) {
-            digitalWrite(digitPins[i], LOW);
-        } else {
-            digitalWrite(digitPins[i], HIGH);
-        }
+        digitalWrite(digitPins[i], i == whichDigit ? LOW : HIGH);
     }
 }
 
@@ -63,6 +64,11 @@ uint8_t MySegDisplay::pointBits()
     return 0b00000001;
 }
 
+void MySegDisplay::updateState(int8_t digit, uint8_t bits)
+{
+    state[digit] = bits;
+}
+
 void MySegDisplay::begin(pin_size_t ledDigits[DIGIT_COUNT], pin_size_t shrSer, pin_size_t shrRclk, pin_size_t shrSrclk)
 {
     for (size_t i = 0; i < DIGIT_COUNT; i++)
@@ -90,16 +96,40 @@ void MySegDisplay::setNumber(int number, int decimalPoint)
     _decPoint = decimalPoint;
     for (size_t i = 1; i <= DIGIT_COUNT; i++)
     {
-        setDigit(0);
         auto bits = digitBits(number % 10);
         if (decimalPoint == i - 1)
         {
             bits |= pointBits();
         }
-        storeInShiftRegister(bits);
-        setDigit(DIGIT_COUNT - i + 1);
+        updateState(DIGIT_COUNT - i, bits);
         number /= 10;
-        delay(1);
     }
-    setDigit(0);
+}
+
+void MySegDisplay::setGlyph(int digit, uint8_t bits)
+{
+    state[digit] = bits;
+}
+
+void MySegDisplay::horizontalLine(int height)
+{
+    int bits;
+    switch (height)
+    {
+    case 0:
+        bits = 0b00010001;
+        break;
+    case 1:
+        bits = 0b00000010;
+        break;
+    case 2:
+        bits = 0b10000000;
+        break;
+    default:
+        break;
+    }
+    for (size_t i = 0; i < DIGIT_COUNT; i++)
+    {
+        updateState(i, bits);
+    }
 }
