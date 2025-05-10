@@ -1,5 +1,5 @@
 #include "MySegDisplay.h"
-// #include "SPI.h"
+#include "SPI.h"
 
 void MySegDisplay::refresh()
 {
@@ -15,10 +15,10 @@ void MySegDisplay::refresh()
 
 void MySegDisplay::storeInShiftRegister(uint8_t data)
 {
-    // SPI.begin();
     digitalWrite(shrRclk, LOW);
-    // SPI.transfer(data);
-    shiftOut(shrSer, shrSrclk, BitOrder::LSBFIRST, data);
+    SPI.beginTransaction(SPISettings(2000000, BitOrder::LSBFIRST, SPI_MODE0));
+    SPI.transfer(data);
+    SPI.endTransaction();
     digitalWrite(shrRclk, HIGH);
 }
 
@@ -69,24 +69,22 @@ void MySegDisplay::updateState(int8_t digit, uint8_t bits)
     state[digit] = bits;
 }
 
-void MySegDisplay::begin(pin_size_t ledDigits[DIGIT_COUNT], pin_size_t shrSer, pin_size_t shrRclk, pin_size_t shrSrclk)
+void MySegDisplay::begin(pin_size_t ledDigits[DIGIT_COUNT], pin_size_t shrRclk)
 {
     for (size_t i = 0; i < DIGIT_COUNT; i++)
     {
         pinMode(ledDigits[i], OUTPUT);
     }
 
-    pinMode(shrSer, OUTPUT);
+    pinMode(PIN_SPI_MOSI, OUTPUT);
     pinMode(shrRclk, OUTPUT);
-    pinMode(shrSrclk, OUTPUT);
+    pinMode(PIN_SPI_SCK, OUTPUT);
 
     for (int i = 0; i < DIGIT_COUNT; i++)
     {
         this->digitPins[i] = ledDigits[i];
     }
     
-    this->shrSer = shrSer;
-    this->shrSrclk = shrSrclk;
     this->shrRclk = shrRclk;
 }
 

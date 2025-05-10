@@ -8,9 +8,7 @@
 #define LED_DIGIT_3 PIN_D5
 #define LED_DIGIT_4 PIN_D3
 
-#define SHR_SER PIN_D8
-#define SHR_RCLK PIN_D9
-#define SHR_SRCLK PIN_D10
+#define SHR_RCLK PIN_D10
 
 MySegDisplay display;
 
@@ -24,14 +22,14 @@ void setup() {
         ;
     }
     Serial.println("Hello Serial!");
-    display.begin(ledPins, SHR_SER, SHR_RCLK, SHR_SRCLK);
+    display.begin(ledPins, SHR_RCLK);
     pinMode(PIN_BUTTON, INPUT_PULLUP);
 
     attachInterrupt(PIN_BUTTON, triggerButton, RISING);
 
 }
 
-int x = 0;
+int x = 1;
 int dot = 0;
 int lastChange = 0;
 bool run = true;
@@ -50,6 +48,9 @@ bool isPrime(int p)
 
 void nextPrime(int &p)
 {
+    if (x & 1 == 0) {
+        x--;
+    }
     do
     {
         p += 2;
@@ -60,16 +61,23 @@ void loop()
 {
     if (run && millis() - lastChange >= 800)
     {
-        display.horizontalLine(x++ % 3);
+        // display.horizontalLine(x++ % 3);
 
-        display.setGlyph(1, 0b10010010);
+        // // display.setGlyph(0, 0b10000000);
+        // display.setGlyph(1, 0b10000000);
+        // display.setGlyph(2, 0b10000000);
+        // display.setGlyph(3, 0b10000000);
+
         lastChange = millis();
-        // nextPrime(x);
-        // if (x > 9999)
-        // {
-        //     x = 1;
-        // }
-        // display.setNumber(x, dot++ % 4);
+        // Serial.println(F("Calculating next prime..."));
+        nextPrime(x);
+        // Serial.print(F("Got "));
+        // Serial.println(x);
+        if (x > 9999)
+        {
+            x = 1;
+        }
+        display.setNumber(x, dot++ % 4);
     }
     display.refresh();
 }
