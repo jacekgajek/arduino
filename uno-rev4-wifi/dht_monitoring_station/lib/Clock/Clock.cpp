@@ -2,7 +2,6 @@
 
 void Clock::begin() {
     _timeClient.begin();
-    update();
 }
 
 void Clock::setTimeZone(int timeZoneOffsetHours)
@@ -10,13 +9,18 @@ void Clock::setTimeZone(int timeZoneOffsetHours)
     _timeZoneOffsetHours = timeZoneOffsetHours;
 }
 
-void Clock::update() {
-    _timeClient.update();
+bool Clock::update()
+{
+    bool success = _timeClient.forceUpdate();
 
-    auto epochTime = _timeClient.getEpochTime() + (_timeZoneOffsetHours * 3600);
-    auto time = RTCTime(epochTime);
+    if (success)
+    {
+        auto epochTime = _timeClient.getEpochTime() + (_timeZoneOffsetHours * 3600);
+        auto time = RTCTime(epochTime);
 
-    RTC.setTime(time);
+        RTC.setTime(time);
+    }
+    return success;
 }
 
 String Clock::getFormattedTime() {
@@ -42,7 +46,8 @@ void Clock::setAlarm(const AlarmTime &alarmTime, rtc_cbk_t callback) {
 void Clock::disableAlarm()
 {
     AlarmMatch alarmMatch;
-    RTC.setAlarmCallback(nullptr, _time, alarmMatch);
+    RTCTime tempTime;
+    RTC.setAlarmCallback(nullptr, tempTime, alarmMatch);
     _alarmSet = false;
     _alarmTime = {0, 0};
 }
@@ -61,5 +66,7 @@ bool Clock::isAlarmSet()
 
 RTCTime Clock::getTime()
 {
-    return _time;
+    RTCTime time;
+    RTC.getTime(time);
+    return time;
 }

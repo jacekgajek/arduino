@@ -2,11 +2,7 @@
 #include <Arduino.h>
 #include <NTPClient.h>
 #include <WiFiUdp.h>
-#include <SPI.h>
-#include <WiFiS3.h>
 #include <RTC.h>
-
-#define DEBUG_NTPClient
 
 struct AlarmTime {
     int hour;
@@ -15,7 +11,6 @@ struct AlarmTime {
 
 class Clock {
     private:
-    RTCTime _time;
     int _timeZoneOffsetHours = 0;
     WiFiUDP _udp;
     NTPClient _timeClient = NTPClient(_udp);
@@ -26,7 +21,7 @@ class Clock {
 
     void setTimeZone(int timeZoneOffset);
     void begin();
-    void update();
+    bool update();
 
     void setAlarm(const AlarmTime &alarmTime, rtc_cbk_t callback);
     void disableAlarm();

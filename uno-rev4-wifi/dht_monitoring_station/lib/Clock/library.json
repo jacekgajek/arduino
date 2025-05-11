@@ -1,0 +1,6 @@
+{
+    "name": "Clock",
+    "dependencies": {
+        "arduino-libraries/NTPClient": "^3.2.1"
+    }
+}

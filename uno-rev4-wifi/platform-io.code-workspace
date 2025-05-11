@@ -17,6 +17,10 @@
         {
             "name": "digit_led_display",
             "path": "digit_led_display"
+        },
+        {
+            "name": "dht_monitoring_station",
+            "path": "dht_monitoring_station"
         }
     ],
 	"settings": {
@@ -28,7 +32,7 @@
             "typeinfo": "cpp"
         },
         "github.copilot.enable": {
-            "*": false,
+            "*": true,
             "plaintext": false,
             "markdown": false,
             "scminput": false

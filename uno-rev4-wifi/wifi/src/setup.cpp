@@ -75,6 +75,7 @@ void initTime() {
     myClock.setTimeZone(TIME_ZONE_OFFSET_HOURS);
     Serial.println("Fetching current time...");
     myClock.begin();
+    myClock.update();
     Serial.print("Current time: ");
     Serial.println(myClock.getFormattedTime());
 }

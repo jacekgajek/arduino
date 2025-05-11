@@ -2,5 +2,8 @@
     "name": "Clock",
     "version": "1.0.0",
     "description": "A library for managing time using NTP and RTC on ESP32-S3.",
-    "headers": "Clock.h"
+    "headers": "Clock.h",
+    "dependencies": {
+        "arduino-libraries/NTPClient": "^3.2.1"
+    }
 }
