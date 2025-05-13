@@ -1,0 +1,6 @@
+{
+    "name": "Console",
+    "dependencies": {
+        "olikraus/U8glib": "^1.19.1"
+    }
+}
