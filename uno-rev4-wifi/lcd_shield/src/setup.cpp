@@ -1,5 +1,6 @@
 #include <wifi_secrets.h>
 #include <Arduino.h>
+#include <Console.h>
 #include <WiFi.h>
 
 char ssid[] = WIFI_SSID;
@@ -9,33 +10,51 @@ void printMacAddress(byte mac[]);
 void printCurrentNet();
 void printWifiData();
 
-void initWifi()
+int signalStrength() {
+    int rssi = WiFi.RSSI();
+
+    const int minRSSI = -90; // Weak signal
+    const int maxRSSI = -30; // Strong signal
+    const int minGrade = 0;
+    const int maxGrade = 4;
+
+    // Map RSSI to the scale
+    int grade = round(1.0f * (rssi - minRSSI) * (maxGrade - minGrade) / (maxRSSI - minRSSI) + minGrade);
+
+    // Clamp the grade between 0 and 5
+    if (grade < minGrade) grade = minGrade;
+    if (grade > maxGrade) grade = maxGrade;
+
+    return grade;
+}
+
+bool initWifi(Console &console)
 {
     int status = WL_IDLE_STATUS;
 
     if (WiFi.status() == WL_NO_MODULE)
     {
-        Serial.println("Communication with WI-FI module failed!");
-        while (true)
-            ;
+        console.println("WI-FI failed!");
+        return false;
     }
 
     String fv = WiFi.firmwareVersion();
-    Serial.print("Firmware version: ");
-    Serial.println(fv);
+    console.println("ver " + String(fv));
     if (fv < WIFI_FIRMWARE_LATEST_VERSION)
     {
-        Serial.println("Please upgrade the firmware");
+        console.println("Upgrade firmware!");
     }
 
     while (status != WL_CONNECTED)
     {
-        Serial.print("Attempting to connect to WPA SSID: ");
-        Serial.println(ssid);
+        console.println("ssid " + String(ssid));
         status = WiFi.begin(ssid, pass);
         delay(100);
     }
-    Serial.println("You're connected to the network");
+    IPAddress ip = WiFi.localIP();
+    console.println("ip " + String(ip.toString()));
+    console.println("sig " + String(WiFi.RSSI()));
+    console.println("grade " + String(signalStrength()));
 
-    printWifiData();
+    // printWifiData();
 }

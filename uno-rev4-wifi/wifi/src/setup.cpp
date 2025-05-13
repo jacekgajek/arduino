@@ -42,16 +42,6 @@ void triggerPrintingWifiData()
     printInfo = true;
 }
 
-// void triggerBuzzerSwitch()
-// {
-    // buzzer.setIsActive(!buzzer.isActive());
-// }
-
-// void triggerBuzzerStart()
-// {
-    // buzzer.activate();
-// }
-
 void initPins()
 {
     pinMode(BUTTON_UP_PIN, INPUT_PULLUP);

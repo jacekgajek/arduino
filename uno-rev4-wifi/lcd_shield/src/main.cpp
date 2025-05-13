@@ -2,70 +2,71 @@
 #include <Console.h>
 #include <U8glib.h>
 #include <Clock.h>
-
+#include <RTC.h>
+#include <WiFi.h>
+#include <SignalStrengthWidget.h>
 
 // U8G2_ST7565_NHD_C12864_1_4W_HW_SPI u8g2(U8G2_R0, PIN_D10, PIN_D9, PIN_D8);
 // U8G2_ST7565_NHD_C12864_1_4W_SW_SPI u8g2(U8G2_R0, D13, D11, D10, D8);
-U8GLIB_NHD_C12864 u8g2( D13, D11, D10, 9, PIN_D8);
+U8GLIB_NHD_C12864 u8g(D13, D11, D10, 9, PIN_D8);
 Clock myClock;
 Console console;
+SignalStrengthWidget signalStrengthWidget;
 
 int timeUpdate;
 
-void initWifi();
+void initWifi(Console &console);
+int signalStrength();
 
 float humidity = 0;
 
 void draw(void)
 {
-    // graphic commands to redraw the complete screen should be placed here
     // 128x64 pixel
-    u8g2.setFont(u8g_font_6x13r);
+    u8g.setFont(u8g_font_6x13r);
     auto time = myClock.getTime();
     char buffer[100];
     sprintf(buffer, "%02d:%02d:%02d", time.getHour(), time.getMinutes(), time.getSeconds());
-    u8g2.drawStr(80, 10, buffer);
-    
-    console.draw(u8g2);
-    // u8g2.println("Yo 2");
-    // u8g2.println("Yo 3");
-    // u8g2.println("Yo 4");
+    u8g.drawStr(0, 10, buffer);
+    console.draw(u8g);
 
-
-    // u8g2.drawStr(0, 8, "Hello");
-    // u8g2.drawStr(0, 8+13, "World");
+    signalStrengthWidget.setSignalStrength(signalStrength());
+    signalStrengthWidget.draw(u8g, 118, 8);
 }
+
 void setup()
 {
-    u8g2.begin();
-    u8g2.setContrast(0); // Config the contrast to the best effect
-    // initWifi();
-    // myClock.begin();
-    // myClock.setTimeZone(2);
-    // myClock.update();
+    RTC.begin();
+    u8g.begin();
+    u8g.setContrast(0);
+    initWifi(console);
+    myClock.begin();
+    myClock.setTimeZone(2);
 }
 
 int x = 0;
+int consoleCleared = 5000;
 void loop()
 {
 
-    u8g2.firstPage();
+    u8g.firstPage();
     do
     {
-        // u8g.println("Humidity: " + String(humidity) + " %");
-
         draw();
-    } while (u8g2.nextPage());
+    } while (u8g.nextPage());
 
-    if (timeUpdate == 0 || millis() - timeUpdate > 1000)
+    if (timeUpdate == 0 || millis() - timeUpdate > 10000)
     {
         timeUpdate = millis();
+        myClock.update();
     }
     x++;
     if (x > 20) {
-        console.clear();
         x = 0;
     }
-    console.println(("Cool " + String(x)).c_str());
-    delay(1000);
+    delay(100);
+    if (consoleCleared > 0 && millis() > consoleCleared) {
+        console.clear();
+        consoleCleared = 0;
+    }
 }
