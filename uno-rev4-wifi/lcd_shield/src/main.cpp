@@ -3,7 +3,7 @@
 
 // U8G2_ST7565_NHD_C12864_1_4W_HW_SPI u8g2(U8G2_R0, PIN_D10, PIN_D9, PIN_D8);
 // U8G2_ST7565_NHD_C12864_1_4W_SW_SPI u8g2(U8G2_R0, D13, D11, D10, D8);
-U8GLIB_NHD_C12864 u8g2( D13, D11, D10, PIN_A0, PIN_D8);
+U8GLIB_NHD_C12864 u8g2( D13, D11, D10, 9, PIN_D8);
 
 float humidity = 0;
 
@@ -13,7 +13,8 @@ void draw(void)
     u8g2.setFont(u8g_font_unifont);
     // u8g.setFont(u8g_font_osb21);
     u8g2.drawCircle(64, 32, 20);
-    u8g2.drawStr(0, 10, "Hello World!");
+    u8g2.drawStr(0, 10, "Hello");
+    u8g2.drawStr(0, 10, "World");
 }
 void setup()
 {
