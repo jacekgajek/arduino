@@ -3,6 +3,7 @@
 #include <RTC.h>
 #include <MySegDisplay.h>
 #include <Clock.h>
+#include <Servo.h>
 
 #define PIN_BUTTON PIN_D1
 
@@ -14,9 +15,12 @@
 #define SHR_RCLK PIN_D10
 #define PIN_OE PIN_D8
 
+// #define PIN_SERVO PIN_D9
+
 MySegDisplay display;
 DHT dht(PIN_D0, DHT22);
 Clock myClock;
+// Servo servo;
 
 void triggerButton();
 void initWifi();
@@ -37,6 +41,8 @@ void setup() {
 
     RTC.begin();
     dht.begin();
+    // servo.attach(PIN_SERVO);
+    // servo.write(0);
     Serial.println("Initializing clock...");
     myClock.setTimeZone(2);
     myClock.begin();
@@ -64,6 +70,7 @@ int dhtReadingPeriod = 2000;
 int clockUpdatePeriod = 36000;
 int humidity = 0;
 int temperature = 0;
+// int angle = 0;
 bool run = true;
 
 int updateIntervalMs = 2000;
@@ -80,6 +87,8 @@ void loop()
             Serial.println("Failed to update clock.");
         }
     }
+    // angle = (angle + 1) % 180;
+        // servo.write(angle+=1);
     if (millis() - lastDisplayChange >= updateIntervalMs)
     {
         if (run) {

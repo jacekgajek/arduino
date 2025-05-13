@@ -21,6 +21,10 @@
         {
             "name": "dht_monitoring_station",
             "path": "dht_monitoring_station"
+        },
+        {
+            "name": "lcd_shield",
+            "path": "lcd_shield"
         }
     ],
 	"settings": {
