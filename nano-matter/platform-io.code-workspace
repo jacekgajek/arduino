@@ -1,8 +1,7 @@
 {
 	"folders": [
         {
-            "name": "sensors",
-            "path": "../../sensors"
+            "path": "sensors"
         }
     ],
 	"settings": {

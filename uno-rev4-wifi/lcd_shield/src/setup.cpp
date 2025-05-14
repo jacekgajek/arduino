@@ -6,6 +6,8 @@
 char ssid[] = WIFI_SSID;
 char pass[] = WIFI_PASSWORD;
 
+
+
 void printMacAddress(byte mac[]);
 void printCurrentNet();
 void printWifiData();

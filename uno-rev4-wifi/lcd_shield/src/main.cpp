@@ -6,8 +6,8 @@
 #include <WiFi.h>
 #include <SignalStrengthWidget.h>
 
-// U8G2_ST7565_NHD_C12864_1_4W_HW_SPI u8g2(U8G2_R0, PIN_D10, PIN_D9, PIN_D8);
-// U8G2_ST7565_NHD_C12864_1_4W_SW_SPI u8g2(U8G2_R0, D13, D11, D10, D8);
+pin_size_t JOYSTICK = A0;
+
 U8GLIB_NHD_C12864 u8g(D13, D11, D10, 9, PIN_D8);
 Clock myClock;
 Console console;
@@ -20,6 +20,34 @@ int signalStrength();
 
 float humidity = 0;
 
+enum JoystickState
+{
+    UP,
+    DOWN,
+    LEFT,
+    RIGHT,
+    CENTER,
+    NONE
+};
+
+JoystickState readJoystick()
+{
+    int joy = analogRead(JOYSTICK);
+    if (joy == 623) {
+        return LEFT;
+    } else if (joy == 821) {
+        return DOWN;
+    } else if (joy == 407) {
+        return UP;
+    } else if (joy == 0) {
+        return RIGHT;
+    } else if (joy == 207) {
+        return CENTER;
+    } else {
+        return NONE;
+    }
+}
+    
 void draw(void)
 {
     // 128x64 pixel
@@ -42,6 +70,9 @@ void setup()
     initWifi(console);
     myClock.begin();
     myClock.setTimeZone(2);
+
+    pinMode(D2, OUTPUT);
+    pinMode(D3, OUTPUT);
 }
 
 int x = 0;
@@ -68,5 +99,21 @@ void loop()
     if (consoleCleared > 0 && millis() > consoleCleared) {
         console.clear();
         consoleCleared = 0;
+    }
+    auto joy = readJoystick();
+    if (joy == UP) {
+        console.println("UP");
+        digitalWrite(D2, HIGH);
+    } else if (joy == DOWN) {
+        digitalWrite(D3, HIGH);
+    } else if (joy == LEFT) {
+        console.println("LEFT");
+    } else if (joy == RIGHT) {
+        console.println("RIGHT");
+    } else if (joy == CENTER) {
+        console.println("CENTER");
+    } else {
+        digitalWrite(D2, LOW);
+        digitalWrite(D3, LOW);
     }
 }
