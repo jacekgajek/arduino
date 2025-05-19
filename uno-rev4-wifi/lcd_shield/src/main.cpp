@@ -57,6 +57,7 @@ JoystickState readJoystick()
 
 bool consoleVisible = true;
 bool consoleCleared = false;
+bool headerVisible = true;
 
 void reset() {
     NVIC_SystemReset();
@@ -65,29 +66,32 @@ void reset() {
 char buffer[100];
 int debounce = 200;
 int lastDebounce = 0;
+int lastRedraw = 0;
+int redraw = 40;
 
 void draw(void)
 {
-    // 128x64 pixel
-    u8g.drawBox(0, 0, 128, 11);
-    u8g.setColorIndex(0);
-    u8g.setFont(u8g_font_6x13r);
-    auto time = myClock.getTime();
-    sprintf(buffer, "%02d:%02d:%02d", time.getHour(), time.getMinutes(), time.getSeconds());
-    u8g.drawStr(0, 10, buffer);
-
-    signalStrengthWidget.setSignalStrength(signalStrength());
-    signalStrengthWidget.draw(u8g, 118, 8);
-
-    u8g.setColorIndex(1);
-
-    if (!consoleVisible)
+    if (headerVisible)
     {
-        menu.draw(u8g);
+        u8g.drawBox(0, 0, 128, 11);
+        u8g.setColorIndex(0);
+        u8g.setFont(u8g_font_6x13r);
+        auto time = myClock.getTime();
+        sprintf(buffer, "%02d:%02d:%02d", time.getHour(), time.getMinutes(), time.getSeconds());
+        u8g.drawStr(0, 10, buffer);
+
+        signalStrengthWidget.setSignalStrength(signalStrength());
+        signalStrengthWidget.draw(u8g, 118, 8);
+
+        u8g.setColorIndex(1);
     }
     if (consoleVisible)
     {
         console.draw(u8g);
+    }
+    else
+    {
+        menu.draw(u8g);
     }
 }
 
@@ -122,16 +126,18 @@ void setup()
 
 void loop()
 {
-
-    u8g.firstPage();
-    do
+    int now = millis();
+    if (now - lastRedraw > redraw)
     {
-        draw();
-    } while (u8g.nextPage());
+        lastRedraw = now;
+        u8g.firstPage();
+        do
+        {
+            draw();
+        } while (u8g.nextPage());
+    }
 
-    auto now = millis();
-
-    if (timeUpdate == 0 || now - timeUpdate > 10000)
+    if (timeUpdate == 0 || now - timeUpdate > 3600000)
     {
         timeUpdate = now;
         myClock.update();

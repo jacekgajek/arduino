@@ -57,6 +57,4 @@ bool initWifi(Console &console)
     console.println("ip " + String(ip.toString()));
     console.println("sig " + String(WiFi.RSSI()));
     console.println("grade " + String(signalStrength()));
-
-    // printWifiData();
 }
