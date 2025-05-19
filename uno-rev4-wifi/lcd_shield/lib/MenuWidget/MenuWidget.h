@@ -12,20 +12,22 @@ static const int maxEntryCount = CONSOLE_HEIGHT - 1;
 
 typedef void (*menu_callback)(void); // type for conciseness
 
-class Menu {
+class MenuWidget {
 
 private:
-    char entries[maxEntryCount][CONSOLE_WIDTH + 1] = {{" Play Snake"},
-                                                      {" Reset clock"},
-                                                      {" Reconnect"},
-                                                      {" Reset"}};
+    char entries[maxEntryCount][CONSOLE_WIDTH + 1] = { {""},
+                                                       {""},
+                                                       {""},
+                                                       {""}};
 
-
-    menu_callback handlers[maxEntryCount] = {nullptr, nullptr, nullptr, nullptr};
+    menu_callback handlers[maxEntryCount] = {nullptr};
     int selectedEntry = 0;
+    int entryCount = 0;
+
+    void updateEntryCount();
+    void setEntry(byte index, char *label);
 
 public:
-    void setEntry(byte index, char *label);
     void setEntries(char** labels, byte count);
     void handler(byte index, menu_callback func);
     void draw(U8GLIB &display);

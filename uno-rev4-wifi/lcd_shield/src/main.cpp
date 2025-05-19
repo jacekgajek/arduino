@@ -7,7 +7,7 @@
 #include <Clock.h>
 #include <RTC.h>
 #include <WiFi.h>
-#include <Menu.h>
+#include <MenuWidget.h>
 #include <SignalStrengthWidget.h>
 
 pin_size_t JOYSTICK = A0;
@@ -16,7 +16,7 @@ U8GLIB_NHD_C12864 u8g(D13, D11, D10, 9, PIN_D8);
 Clock myClock;
 Console console;
 SignalStrengthWidget signalStrengthWidget;
-Menu menu;
+MenuWidget menu;
 
 int timeUpdate;
 
