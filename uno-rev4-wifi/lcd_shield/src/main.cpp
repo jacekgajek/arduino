@@ -1,9 +1,13 @@
+#define CONSOLE_WIDTH 20
+#define CONSOLE_HEIGHT 5
+
 #include <Arduino.h>
 #include <Console.h>
 #include <U8glib.h>
 #include <Clock.h>
 #include <RTC.h>
 #include <WiFi.h>
+#include <Menu.h>
 #include <SignalStrengthWidget.h>
 
 pin_size_t JOYSTICK = A0;
@@ -12,6 +16,7 @@ U8GLIB_NHD_C12864 u8g(D13, D11, D10, 9, PIN_D8);
 Clock myClock;
 Console console;
 SignalStrengthWidget signalStrengthWidget;
+Menu menu;
 
 int timeUpdate;
 
@@ -19,6 +24,8 @@ void initWifi(Console &console);
 int signalStrength();
 
 float humidity = 0;
+int consoleClear = 4000;
+int consoleLast = 0;
 
 enum JoystickState
 {
@@ -47,19 +54,50 @@ JoystickState readJoystick()
         return NONE;
     }
 }
-    
+
+bool consoleVisible = true;
+bool consoleCleared = false;
+
+void reset() {
+    NVIC_SystemReset();
+}
+
+char buffer[100];
+int debounce = 200;
+int lastDebounce = 0;
+
 void draw(void)
 {
     // 128x64 pixel
+    u8g.drawBox(0, 0, 128, 11);
+    u8g.setColorIndex(0);
     u8g.setFont(u8g_font_6x13r);
     auto time = myClock.getTime();
-    char buffer[100];
     sprintf(buffer, "%02d:%02d:%02d", time.getHour(), time.getMinutes(), time.getSeconds());
     u8g.drawStr(0, 10, buffer);
-    console.draw(u8g);
 
     signalStrengthWidget.setSignalStrength(signalStrength());
     signalStrengthWidget.draw(u8g, 118, 8);
+
+    u8g.setColorIndex(1);
+
+    if (!consoleVisible)
+    {
+        menu.draw(u8g);
+    }
+    if (consoleVisible)
+    {
+        console.draw(u8g);
+    }
+}
+
+void handleUpdateClock() {
+    myClock.update();
+}
+void handleReconnect() {
+    consoleLast = millis();
+    consoleVisible = true;
+    initWifi(console);
 }
 
 void setup()
@@ -71,12 +109,17 @@ void setup()
     myClock.begin();
     myClock.setTimeZone(2);
 
+    char* entries[4] = { " Play Snake", " Update clock", " Reconnect", " Reset"};
+    menu.setEntries(entries, 4);
+    menu.handler(1, handleUpdateClock);
+    menu.handler(2, handleReconnect);
+    menu.handler(3, reset);
+
     pinMode(D2, OUTPUT);
     pinMode(D3, OUTPUT);
 }
 
-int x = 0;
-int consoleCleared = 5000;
+
 void loop()
 {
 
@@ -86,34 +129,47 @@ void loop()
         draw();
     } while (u8g.nextPage());
 
-    if (timeUpdate == 0 || millis() - timeUpdate > 10000)
+    auto now = millis();
+
+    if (timeUpdate == 0 || now - timeUpdate > 10000)
     {
-        timeUpdate = millis();
+        timeUpdate = now;
         myClock.update();
     }
-    x++;
-    if (x > 20) {
-        x = 0;
-    }
-    delay(100);
-    if (consoleCleared > 0 && millis() > consoleCleared) {
+    if (!consoleVisible && !consoleCleared)
+    {
         console.clear();
-        consoleCleared = 0;
+        consoleCleared = true;
+    }
+    else if (consoleVisible && now - consoleLast > consoleClear)
+    {
+        consoleVisible = false;
+        consoleCleared = false;
     }
     auto joy = readJoystick();
-    if (joy == UP) {
-        console.println("UP");
-        digitalWrite(D2, HIGH);
-    } else if (joy == DOWN) {
-        digitalWrite(D3, HIGH);
-    } else if (joy == LEFT) {
-        console.println("LEFT");
-    } else if (joy == RIGHT) {
-        console.println("RIGHT");
-    } else if (joy == CENTER) {
-        console.println("CENTER");
-    } else {
-        digitalWrite(D2, LOW);
-        digitalWrite(D3, LOW);
+
+    if (joy != NONE && now - lastDebounce > debounce)
+    {
+        lastDebounce = now;
+        switch (joy)
+        {
+        case UP:
+            menu.moveUp();
+            break;
+        case DOWN:
+            menu.moveDown();
+            break;
+        case LEFT:
+            console.println("LEFT");
+            break;
+        case RIGHT:
+            console.println("RIGHT");
+            break;
+        case CENTER:
+            menu.enter();
+            break;
+        default:
+            break;
+        }
     }
 }

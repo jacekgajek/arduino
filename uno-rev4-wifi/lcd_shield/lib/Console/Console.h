@@ -50,7 +50,7 @@ public:
         consoleLine = 0;
     }
 
-    void draw(U8GLIB_NHD_C12864 &display)
+    void draw(U8GLIB &display)
     {
         display.setFont(u8g_font_6x13r);
         for (int i = 0; i < HEIGHT; i++)
