@@ -2,6 +2,10 @@
 	"folders": [
         {
             "path": "sensors"
+        },
+        {
+            "name": "serial-nano",
+            "path": "serial-nano"
         }
     ],
 	"settings": {

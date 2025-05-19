@@ -1,9 +1,8 @@
 
 #include <Arduino.h>
 #include <DHT.h>
-#include <Keypad.h>
 
-#define PIN_LED D5
+#define PIN_LED_EXT D3
 #define PIN_DHT22 D2
 
 DHT dht(PIN_DHT22, DHT22);
@@ -12,43 +11,28 @@ int lastUpdate = 0;
 float humidity = 0;
 float temperature = 0;
 
-
-const byte ROWS = 4; //four rows
-const byte COLS = 4; //four columns
-char keys[ROWS][COLS] = {
-  {'1','2','3','A'},
-  {'4','5','6','B'},
-  {'7','8','9','C'},
-  {'*','0','#','D'}
-};
-byte rowPins[ROWS] = {3, 4, 5, 6};
-byte colPins[COLS] = {7, 8, 9, 10};
-
-Keypad keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
 void setup() {
     Serial.begin(9600);
 
     while (!Serial) {
     }
-
-    for (size_t i = 0; i < ROWS; i++)
-    {
-        pinMode(rowPins[i], OUTPUT);
-        pinMode(colPins[i], INPUT);
-    }
     
     Serial.println("Hello Serial!");
+    Serial1.begin(9600);
 
     dht.begin();
-    pinMode(PIN_LED, OUTPUT);
+    pinMode(PIN_LED_EXT, OUTPUT);
+    pinMode(D4, INPUT);
+    pinMode(D5, INPUT);
 }
 
+
 void loop() {
+    Serial.println("Entering main loop!");
     while (true) {
         if (lastUpdate == 0 || millis() - lastUpdate > 6000) {
             humidity = dht.readHumidity();
             temperature = dht.readTemperature();
-        Serial.println("Loop!");
 
             if (isnan(humidity) || isnan(temperature)) {
                 Serial.println("Failed to read from DHT sensor!");
@@ -62,34 +46,23 @@ void loop() {
             lastUpdate = millis();
         }
 
-        char key = keypad.getKey();
-        if (key != NO_KEY) {
-            Serial.println(key);
+        delay(100);
+        if (digitalRead(D4) == HIGH) {
+            digitalWrite(PIN_LED_EXT, HIGH);
+        } 
+        if (digitalRead(D5) == HIGH) {
+            digitalWrite(PIN_LED_EXT, LOW);
         }
-        byte state = 0;
-        for (byte i = 0; i < 4; i++)
-        {
-            auto pinState = digitalRead(rowPins[i]);
-            if (pinState == HIGH) {
-                Serial.print("1");
-            } else {
-                Serial.print("0");
-            }
+        Serial.println("Reading from Serial1...");
+
+        while(Serial1.available()) {
+            char c = Serial1.read();
+            Serial.print(c);
         }
-        for (byte i = 0; i < 4; i++)
-        {
-            auto pinState = digitalRead(colPins[i]);
-            if (pinState == HIGH) {
-                Serial.print("1");
-            } else {
-                Serial.print("0");
-            }
-        }
-        
-        Serial.println();
-        delay(200);
+        // Uncomment the following lines to blink the LEkk
         // digitalWrite(PIN_LED, HIGH);
         // delay(1000);
         // digitalWrite(PIN_LED, LOW);
+        Serial.println("Loop!");
     }
 }
