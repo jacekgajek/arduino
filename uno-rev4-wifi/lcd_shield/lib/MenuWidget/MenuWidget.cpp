@@ -32,7 +32,7 @@ void MenuWidget::setEntries(char** labels, byte count)
 
 void MenuWidget::handler(byte index, menu_callback func)
 {
-    if (index > 0 && index < entryCount) {
+    if (index >= 0 && index < entryCount) {
         handlers[index] = func;
     }
 }

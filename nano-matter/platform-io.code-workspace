@@ -6,6 +6,10 @@
         {
             "name": "serial-nano",
             "path": "serial-nano"
+        },
+        {
+            "name": "arduino_isp",
+            "path": "arduino_isp"
         }
     ],
 	"settings": {

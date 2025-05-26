@@ -2,6 +2,7 @@
 #define CONSOLE_HEIGHT 5
 
 #include <Arduino.h>
+#include <LcdShieldJoystick.h>
 #include <Console.h>
 #include <U8glib.h>
 #include <Clock.h>
@@ -9,14 +10,15 @@
 #include <WiFi.h>
 #include <MenuWidget.h>
 #include <SignalStrengthWidget.h>
-
-pin_size_t JOYSTICK = A0;
+#include <SnakeGame.hpp>
 
 U8GLIB_NHD_C12864 u8g(D13, D11, D10, 9, PIN_D8);
 Clock myClock;
 Console console;
 SignalStrengthWidget signalStrengthWidget;
 MenuWidget menu;
+LcdShieldJoystick joystick(A0);
+SnakeGame snakeGame(joystick, u8g);
 
 int timeUpdate;
 
@@ -27,37 +29,13 @@ float humidity = 0;
 int consoleClear = 4000;
 int consoleLast = 0;
 
-enum JoystickState
-{
-    UP,
-    DOWN,
-    LEFT,
-    RIGHT,
-    CENTER,
-    NONE
-};
-
-JoystickState readJoystick()
-{
-    int joy = analogRead(JOYSTICK);
-    if (joy == 623) {
-        return LEFT;
-    } else if (joy == 821) {
-        return DOWN;
-    } else if (joy == 407) {
-        return UP;
-    } else if (joy == 0) {
-        return RIGHT;
-    } else if (joy == 207) {
-        return CENTER;
-    } else {
-        return NONE;
-    }
-}
-
 bool consoleVisible = true;
 bool consoleCleared = false;
 bool headerVisible = true;
+bool snake = false;
+bool shouldRestartSnake = true;
+
+
 
 void reset() {
     NVIC_SystemReset();
@@ -103,6 +81,16 @@ void handleReconnect() {
     consoleVisible = true;
     initWifi(console);
 }
+void handleSnake() {
+    consoleVisible = false;
+    snake = true;
+    headerVisible = false;
+    if (shouldRestartSnake) {
+        snakeGame.reset();
+    } else {
+        snakeGame.resume();
+    }
+}
 
 void setup()
 {
@@ -115,6 +103,7 @@ void setup()
 
     char* entries[4] = { " Play Snake", " Update clock", " Reconnect", " Reset"};
     menu.setEntries(entries, 4);
+    menu.handler(0, handleSnake);
     menu.handler(1, handleUpdateClock);
     menu.handler(2, handleReconnect);
     menu.handler(3, reset);
@@ -124,7 +113,38 @@ void setup()
 }
 
 
+void menuLoop();
+
 void loop()
+{
+    if (snake)
+    {
+        bool running = snakeGame.gameLoop();
+        if (!running)
+        {
+            snake = false;
+            headerVisible = true;
+            consoleVisible = true;
+            consoleLast = millis();
+            if (snakeGame.getResult().result == PAUSED) {
+                console.println("Game paused!");
+                console.println("Current score: " + String(snakeGame.getResult().score));
+                shouldRestartSnake = false;
+            } else {
+                console.println("Snake game finished!");
+                console.println("Final score: " + String(snakeGame.getResult().score));
+                shouldRestartSnake = true;
+            }
+        }
+    }
+    else
+    {
+        menuLoop();
+    }
+}
+
+
+void menuLoop()
 {
     int now = millis();
     if (now - lastRedraw > redraw)
@@ -152,7 +172,7 @@ void loop()
         consoleVisible = false;
         consoleCleared = false;
     }
-    auto joy = readJoystick();
+    auto joy = joystick.read();
 
     if (joy != NONE && now - lastDebounce > debounce)
     {
