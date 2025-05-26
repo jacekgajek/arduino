@@ -86,7 +86,7 @@ void handleSnake() {
     snake = true;
     headerVisible = false;
     if (shouldRestartSnake) {
-        snakeGame.reset();
+        snakeGame.begin();
     } else {
         snakeGame.resume();
     }

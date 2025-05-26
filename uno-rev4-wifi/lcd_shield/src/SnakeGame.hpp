@@ -2,21 +2,20 @@
 
 #include <Arduino.h>
 #include <vector>
+#include <algorithm>
 #include <LcdShieldJoystick.h>
 #include <U8glib.h>
 
 enum GameState
 {
-    WIN_MESSAGE,
-    LOSE_MESSAGE,
-    EXIT_MESSAGE,
+    PAUSE_MESSAGE,
+    GAME_OVER_MESSAGE,
     RUNNING,
 };
 
 enum GameResultType
 {
-    WIN,
-    LOSE,
+    GAME_OVER,
     PAUSED,
 };
 
@@ -30,7 +29,8 @@ class SnakeGame
 {
 private:
     static const int initialUpdateDelay = 100;
-    static const int resultPrintTime = 5000;
+    static const int resultPrintTime = 3000;
+    static const int snakeThickness = 2;
 
     LcdShieldJoystick &joystick;
     U8GLIB &u8g;
@@ -39,6 +39,10 @@ private:
     {
         int x;
         int y;
+        bool operator==(const vector2d &other) const
+        {
+            return other.x == x && other.y == y;
+        }
     };
 
     int debounce = 200;
@@ -47,6 +51,7 @@ private:
 
     int screenHeight;
     int screenWidth;
+    int score = 1;
 
     int lastUpdate = 0;
     int updateDelay = initialUpdateDelay;
@@ -57,19 +62,27 @@ private:
     GameResult result;
 
     vector2d moveDirection;
+    vector2d foodPosition;
 
     std::vector<vector2d> snakeBody;
 
+    bool draw();
     void drawSnake();
     void drawFrame();
-    bool move();
+    void drawFood();
     bool drawResult();
+
+    void createFood();
+    bool move();
+
+    void readJoystick();
+
     GameResultType stateToResultType(GameState state) const;
 
 public:
     SnakeGame(LcdShieldJoystick &joystick, U8GLIB &u8g);
     bool gameLoop();
-    void reset();
+    void begin();
     void resume();
     GameResult getResult() const { return result; }
 };
