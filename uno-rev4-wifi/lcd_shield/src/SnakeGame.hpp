@@ -28,11 +28,11 @@ struct GameResult
 class SnakeGame
 {
 private:
-    static const int initialUpdateDelay = 100;
+    static const int initialUpdateDelay = 300;
     static const int resultPrintTime = 3000;
     static const int snakeThickness = 2;
 
-    LcdShieldJoystick &joystick;
+    Joystick &joystick;
     U8GLIB &u8g;
 
     struct vector2d
@@ -80,7 +80,7 @@ private:
     GameResultType stateToResultType(GameState state) const;
 
 public:
-    SnakeGame(LcdShieldJoystick &joystick, U8GLIB &u8g);
+    SnakeGame(Joystick &joystick, U8GLIB &u8g);
     bool gameLoop();
     void begin();
     void resume();

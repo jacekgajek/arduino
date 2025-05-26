@@ -1,6 +1,6 @@
 #include <SnakeGame.hpp>
 
-SnakeGame::SnakeGame(LcdShieldJoystick &joystick, U8GLIB &u8g) : joystick(joystick), u8g(u8g)
+SnakeGame::SnakeGame(Joystick &joystick, U8GLIB &u8g) : joystick(joystick), u8g(u8g)
 {
     screenHeight = u8g.getHeight();
     screenWidth = u8g.getWidth();
@@ -23,7 +23,7 @@ void SnakeGame::begin()
 {
     moveDirection = {1, 0};
     snakeBody.clear();
-    vector2d headPosition{screenWidth / 2, screenHeight / 2};
+    vector2d headPosition{screenWidth / 2 / snakeThickness, screenHeight / 2 / snakeThickness};
     snakeBody.push_back(headPosition);
     vector2d tailPosition{headPosition.x - 1, headPosition.y };
     snakeBody.push_back(tailPosition);
@@ -129,7 +129,7 @@ void SnakeGame::drawSnake()
 {
     for (auto &&snakePart : snakeBody)
     {
-        u8g.drawBox(snakePart.x, snakePart.y, snakeThickness, snakeThickness);
+        u8g.drawBox(snakePart.x * snakeThickness, snakePart.y * snakeThickness, snakeThickness, snakeThickness);
     }
 }
 
@@ -145,46 +145,48 @@ void SnakeGame::createFood()
 {
     int w = screenWidth / snakeThickness - 2;
     int h = screenHeight / snakeThickness - 2;
-    bool freeSpace[h * w] = { true };
+    std::vector<bool> freeSpace(h * w, true);
 
-    for (size_t i = 0; i < length; i++)
+    for (const auto &snakePart : snakeBody)
     {
-        freeSpace[snakeBody[i].y * h + snakeBody[i].x] = false;
+        if (snakePart.x >= 0 && snakePart.x < w && snakePart.y >= 0 && snakePart.y < h)
+        {
+            freeSpace[snakePart.y * w + snakePart.x] = false;
+        }
     }
 
     int f = random(0, h * w - length);
     int x = 0, y = 0;
-    for (; x < h; x++)
+    for (y = 0; y < h; y++)
     {
-        for (; y < w; y++)
+        for (x = 0; x < w; x++)
         {
-            if (freeSpace[x * h + y])
+            if (freeSpace[y * w + x])
             {
                 if (f == 0)
                 {
-                    goto exit;
+                    updateDelay = max(50, initialUpdateDelay - score * 10);
+                    foodPosition = {x + 1, y + 1};
+                    return;
                 }
                 f--;
             }
         }
     }
-
-exit:
-    foodPosition = {x + 1, y + 1};
 }
 
 void SnakeGame::drawFood()
 {
-    u8g.drawBox(foodPosition.x, foodPosition.y, snakeThickness, snakeThickness);
+    u8g.drawBox(foodPosition.x * snakeThickness, foodPosition.y * snakeThickness, snakeThickness, snakeThickness);
 }
 
 bool SnakeGame::move()
 {
     vector2d newHead(snakeBody.front());
-    newHead.x += moveDirection.x * snakeThickness;
-    newHead.y += moveDirection.y * snakeThickness;
+    newHead.x += moveDirection.x;
+    newHead.y += moveDirection.y;
 
-    if (newHead.x < 0 || newHead.x >= screenWidth || newHead.y < 0 || newHead.y >= screenHeight)
+    if (newHead.x < 0 || newHead.x >= screenWidth/snakeThickness || newHead.y < 0 || newHead.y >= screenHeight/snakeThickness)
     {
         return false;
     }

@@ -1,17 +1,8 @@
 #pragma once
 #include <Arduino.h>
+#include <Joystick.hpp>
 
-enum JoystickState
-{
-    UP,
-    DOWN,
-    LEFT,
-    RIGHT,
-    CENTER,
-    NONE
-};
-
-class LcdShieldJoystick
+class LcdShieldJoystick : public Joystick
 {
 private:
     int pin;
