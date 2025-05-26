@@ -12,11 +12,11 @@ SnakeGame::SnakeGame(Joystick &joystick, U8GLIB &u8g) : joystick(joystick), u8g(
 void SnakeGame::resume()
 {
     state = GameState::RUNNING;
+    previousDirection = moveDirection = {0, 0};
     result = {GameResultType::PAUSED, 0};
     lastDebounce = millis();
-    lastUpdate = millis();
+    lastUpdate = millis() + 3000;
     resultPrintStart = 0;
-    createFood();
 }
 
 void SnakeGame::begin()
@@ -30,6 +30,8 @@ void SnakeGame::begin()
     length = 2;
     score = 0;
     updateDelay = initialUpdateDelay;
+    moveDirection = {1, 0};
+    createFood();
 
     resume();
 }
@@ -92,7 +94,7 @@ bool SnakeGame::draw()
         if (resultPrintStart == 0)
         {
             resultPrintStart = millis();
-            result.score = length;
+            result.score = length - 2;
             result.result = stateToResultType(state);
         }
         if (!drawResult())
@@ -189,6 +191,10 @@ void SnakeGame::drawFood()
 
 bool SnakeGame::move()
 {
+    if (moveDirection.x == 0 && moveDirection.y == 0)
+    {
+        return true;
+    }
     vector2d newHead(snakeBody.front());
     newHead.x += moveDirection.x;
     newHead.y += moveDirection.y;

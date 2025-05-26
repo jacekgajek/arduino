@@ -82,14 +82,14 @@ void handleReconnect() {
     initWifi(console);
 }
 void handleSnake() {
-    consoleVisible = false;
-    snake = true;
-    headerVisible = false;
     if (shouldRestartSnake) {
         snakeGame.begin();
     } else {
         snakeGame.resume();
     }
+    consoleVisible = false;
+    snake = true;
+    headerVisible = false;
 }
 
 void setup()
