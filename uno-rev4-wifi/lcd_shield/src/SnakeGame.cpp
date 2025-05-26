@@ -21,11 +21,11 @@ void SnakeGame::resume()
 
 void SnakeGame::begin()
 {
-    moveDirection = {1, 0};
+    previousDirection = moveDirection = {1, 0};
     snakeBody.clear();
     vector2d headPosition{screenWidth / 2 / snakeThickness, screenHeight / 2 / snakeThickness};
     snakeBody.push_back(headPosition);
-    vector2d tailPosition{headPosition.x - 1, headPosition.y };
+    vector2d tailPosition{headPosition.x - 1, headPosition.y};
     snakeBody.push_back(tailPosition);
     length = 2;
     score = 0;
@@ -34,31 +34,37 @@ void SnakeGame::begin()
     resume();
 }
 
-void SnakeGame::readJoystick() 
+void SnakeGame::readJoystick()
 {
     auto joy = joystick.read();
     if (joy != NONE && millis() - lastDebounce > debounce)
     {
         lastDebounce = millis();
+        vector2d newDirection;
         switch (joy)
         {
         case UP:
-            moveDirection = {0, -1};
+            newDirection = {0, -1};
             break;
         case DOWN:
-            moveDirection = {0, 1};
+            newDirection = {0, 1};
             break;
         case LEFT:
-            moveDirection = {-1, 0};
+            newDirection = {-1, 0};
             break;
         case RIGHT:
-            moveDirection = {1, 0};
+            newDirection = {1, 0};
             break;
         case CENTER:
             state = PAUSE_MESSAGE;
             break;
         default:
             break;
+        }
+        if (!(newDirection == moveDirection))
+        {
+            previousDirection = moveDirection;
+            moveDirection = newDirection;
         }
     }
 }
@@ -97,6 +103,7 @@ bool SnakeGame::draw()
     else
     {
         drawFrame();
+
         if (millis() - lastUpdate > updateDelay)
         {
             lastUpdate = millis();
@@ -186,21 +193,48 @@ bool SnakeGame::move()
     newHead.x += moveDirection.x;
     newHead.y += moveDirection.y;
 
-    if (newHead.x < 0 || newHead.x >= screenWidth/snakeThickness || newHead.y < 0 || newHead.y >= screenHeight/snakeThickness)
+    if (newHead.x < 0 || newHead.x >= screenWidth / snakeThickness || newHead.y < 0 ||
+        newHead.y >= screenHeight / snakeThickness)
     {
         return false;
     }
+    else if (previousDirection.x == -moveDirection.x && previousDirection.y == -moveDirection.y)
+    {
+        // Snake can reverse if it is straight.
+        bool isStraight = true;
+        int dx = moveDirection.x;
+        int dy = moveDirection.y;
+        for (size_t i = 1; i < snakeBody.size(); ++i)
+        {
+            if (snakeBody[i].x - snakeBody[i - 1].x != dx || snakeBody[i].y - snakeBody[i - 1].y != dy)
+            {
+                isStraight = false;
+                break;
+            }
+        }
 
-    if (std::find(snakeBody.begin() + 1, snakeBody.end(), newHead) != snakeBody.end())
+        if (isStraight)
+        {
+            std::reverse(snakeBody.begin(), snakeBody.end());
+            previousDirection = moveDirection;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    else if (std::find(snakeBody.begin() + 1, snakeBody.end(), newHead) != snakeBody.end())
     {
         return false;
     }
-
-    snakeBody.insert(snakeBody.begin(), newHead);
-
-    if (snakeBody.size() > length)
+    else
     {
-        snakeBody.pop_back();
+        snakeBody.insert(snakeBody.begin(), newHead);
+
+        if (snakeBody.size() > length)
+        {
+            snakeBody.pop_back();
+        }
     }
 
     return true;

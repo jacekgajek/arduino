@@ -62,6 +62,7 @@ private:
     GameResult result;
 
     vector2d moveDirection;
+    vector2d previousDirection;
     vector2d foodPosition;
 
     std::vector<vector2d> snakeBody;
