@@ -28,11 +28,10 @@ struct GameResult
 class SnakeGame
 {
 private:
-    static const int initialUpdateDelay = 1000;
-    // static const int initialUpdateDelay = 300;
+    static const int initialUpdateDelay = 300;
 
     static const int resultPrintTime = 3000;
-    static const int snakeThickness = 2;
+    int snakeThickness = 2;
 
     Joystick &joystick;
     U8GLIB &u8g;

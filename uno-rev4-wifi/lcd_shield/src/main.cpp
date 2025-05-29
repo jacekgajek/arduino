@@ -1,8 +1,13 @@
 #define CONSOLE_WIDTH 20
 #define CONSOLE_HEIGHT 5
 
+#define PIN_VRX A1
+#define PIN_VRY A2
+#define PIN_SW A3
+
 #include <Arduino.h>
 #include <LcdShieldJoystick.h>
+#include <AnalogJoystick.h>
 #include <Console.h>
 #include <U8glib.h>
 #include <Clock.h>
@@ -17,8 +22,9 @@ Clock myClock;
 Console console;
 SignalStrengthWidget signalStrengthWidget;
 MenuWidget menu;
-LcdShieldJoystick joystick(A0);
-SnakeGame snakeGame(joystick, u8g);
+LcdShieldJoystick lcdJoystick(A0);
+AnalogJoystick analogJoystick(PIN_VRX, PIN_VRY, PIN_SW);
+SnakeGame snakeGame(analogJoystick, u8g);
 
 int timeUpdate;
 
@@ -34,7 +40,6 @@ bool consoleCleared = false;
 bool headerVisible = true;
 bool snake = false;
 bool shouldRestartSnake = true;
-
 
 
 void reset() {
@@ -73,12 +78,15 @@ void draw(void)
     }
 }
 
+void showConsole() {
+    consoleLast = millis();
+    consoleVisible = true;
+}
 void handleUpdateClock() {
     myClock.update();
 }
 void handleReconnect() {
-    consoleLast = millis();
-    consoleVisible = true;
+    showConsole();
     initWifi(console);
 }
 void handleSnake() {
@@ -110,6 +118,10 @@ void setup()
 
     pinMode(D2, OUTPUT);
     pinMode(D3, OUTPUT);
+
+    pinMode(PIN_SW, INPUT);
+    pinMode(PIN_VRX, INPUT);
+    pinMode(PIN_VRY, INPUT);
 }
 
 
@@ -172,7 +184,7 @@ void menuLoop()
         consoleVisible = false;
         consoleCleared = false;
     }
-    auto joy = joystick.read();
+    auto joy = analogJoystick.read();
 
     if (joy != NONE && now - lastDebounce > debounce)
     {
@@ -198,4 +210,32 @@ void menuLoop()
             break;
         }
     }
+
+    joy = lcdJoystick.read();
+
+    if (joy != NONE && now - lastDebounce > debounce)
+    {
+        lastDebounce = now;
+        switch (joy)
+        {
+        case UP:
+            menu.moveUp();
+            break;
+        case DOWN:
+            menu.moveDown();
+            break;
+        case LEFT:
+            console.println("LEFT");
+            break;
+        case RIGHT:
+            console.println("RIGHT");
+            break;
+        case CENTER:
+            menu.enter();
+            break;
+        default:
+            break;
+        }
+    }
+
 }

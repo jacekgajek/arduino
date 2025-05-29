@@ -30,10 +30,12 @@ void SnakeGame::begin()
     length = 2;
     score = 0;
     updateDelay = initialUpdateDelay;
-    moveDirection = {1, 0};
+    snakeThickness = 2;
     createFood();
 
     resume();
+
+    moveDirection = {1, 0};
 }
 
 void SnakeGame::readJoystick()
@@ -125,6 +127,8 @@ bool SnakeGame::draw()
                     }
                     length = 1;
                 }
+                // todo: convert old body parts' coordinates to new ones under new snake thickness
+                // snakeThickness += 2;
                 createFood();
             }
         }
